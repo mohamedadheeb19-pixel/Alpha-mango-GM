@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stock Market Profit Rules</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #1D9E75;
+    --green-light: #E1F5EE;
+    --green-dark: #085041;
+    --amber: #B87333;
+    --amber-light: #F5EBE0;
+    --coral: #D85A30;
+    --coral-light: #FAECE7;
+    --blue: #378ADD;
+    --blue-light: #E6F1FB;
+    --teal: #0F6E56;
+    --gray: #5F5E5A;
+    --gray-light: #F1EFE8;
+    --bg: #FAFAF8;
+    --surface: #FFFFFF;
+    --text: #2C2C2A;
+    --muted: #888780;
+    --border: rgba(0,0,0,0.1);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #04342C 0%, #0F6E56 50%, #1D9E75 100%);
+    color: white;
+    padding: 80px 24px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .ticker-strip {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+  .ticker-item { display: flex; align-items: center; gap: 6px; opacity: 0.85; }
+  .ticker-up { color: #5DCAA5; }
+  .ticker-down { color: #F09595; }
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 999px;
+    padding: 5px 16px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    max-width: 700px;
+    margin-inline: auto;
+  }
+  .hero p {
+    font-size: 1.1rem;
+    opacity: 0.8;
+    max-width: 520px;
+    margin: 0 auto 32px;
+    font-weight: 300;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    padding-top: 28px;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat .num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    display: block;
+    color: #5DCAA5;
+  }
+  .hero-stat .lbl { font-size: 12px; opacity: 0.65; letter-spacing: 0.5px; }
+
+  /* NAV PILLS */
+  .nav-pills {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 20px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-pill {
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--gray);
+    transition: all 0.2s;
+    background: var(--surface);
+  }
+  .nav-pill:hover { background: var(--green-light); color: var(--teal); border-color: var(--green); }
+
+  /* MAIN LAYOUT */
+  .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+  section { padding: 60px 0; }
+  section + section { border-top: 1px solid var(--border); }
+
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--green);
+    margin-bottom: 12px;
+  }
+  .section-label .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+    line-height: 1.25;
+  }
+  .section-sub {
+    color: var(--muted);
+    font-size: 1rem;
+    max-width: 580px;
+    margin-bottom: 40px;
+  }
+
+  /* RULE CARDS */
+  .rules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+  .rule-card {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .rule-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
+  .rule-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 12px;
+    opacity: 0.15;
+    position: absolute;
+    top: 16px; right: 20px;
+  }
+  .rule-icon {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 14px;
+  }
+  .rule-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
+  .rule-card p { font-size: 0.875rem; color: var(--muted); line-height: 1.6; }
+  .rule-card.accent-green .rule-icon { background: var(--green-light); }
+  .rule-card.accent-amber .rule-icon { background: var(--amber-light); }
+  .rule-card.accent-coral .rule-icon { background: var(--coral-light); }
+  .rule-card.accent-blue .rule-icon { background: var(--blue-light); }
+  .rule-card.accent-green { border-left: 3px solid var(--green); }
+  .rule-card.accent-amber { border-left: 3px solid var(--amber); }
+  .rule-card.accent-coral { border-left: 3px solid var(--coral); }
+  .rule-card.accent-blue { border-left: 3px solid var(--blue); }
+
+  /* GOLDEN RULES — big featured */
+  .golden-rules { display: grid; gap: 20px; }
+  .golden-rule {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 28px 32px;
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 20px;
+    align-items: start;
+    border: 1px solid var(--border);
+    transition: box-shadow 0.2s;
+  }
+  .golden-rule:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+  .rule-badge {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .golden-rule h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; }
+  .golden-rule p { font-size: 0.9rem; color: var(--muted); }
+  .golden-rule .tip {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+
+  /* MISTAKE CARDS */
+  .mistakes-list { display: grid; gap: 14px; }
+  .mistake-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .mistake-x {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: #FCEBEB;
+    color: #A32D2D;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .mistake-item h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+  .mistake-item p { font-size: 0.85rem; color: var(--muted); }
+
+  /* STRATEGY TABLE */
+  .strategy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .strategy-box {
+    border-radius: 14px;
+    padding: 24px;
+    border: 1px solid var(--border);
+  }
+  .strategy-box h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 14px; }
+  .strategy-box ul { list-style: none; }
+  .strategy-box ul li {
+    padding: 7px 0;
+    font-size: 0.875rem;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+  }
+  .strategy-box ul li::before { content: '→'; color: var(--green); flex-shrink: 0; }
+
+  /* QUOTE BAND */
+  .quote-band {
+    background: linear-gradient(135deg, var(--green-light), #d4f2e8);
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+    margin: 40px 0;
+  }
+  .quote-band blockquote {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.2rem, 2.5vw, 1.7rem);
+    color: var(--green-dark);
+    line-height: 1.4;
+    margin-bottom: 12px;
+    font-style: italic;
+  }
+  .quote-band cite { font-size: 0.85rem; color: var(--teal); font-weight: 500; }
+
+  /* CHECKLIST */
+  .checklist { display: grid; gap: 10px; }
+  .check-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    font-size: 0.9rem;
+  }
+  .check-circle {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--green-light);
+    border: 1.5px solid var(--green);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    color: var(--green);
+    font-weight: 700;
+  }
+
+  /* FOOTER */
+  footer {
+    background: #04342C;
+    color: rgba(255,255,255,0.7);
+    text-align: center;
+    padding: 32px 20px;
+    font-size: 0.85rem;
+  }
+  footer strong { color: #5DCAA5; }
+
+  @media (max-width: 600px) {
+    .strategy-grid { grid-template-columns: 1fr; }
+    .golden-rule { grid-template-columns: 1fr; gap: 12px; }
+    .hero-stats { gap: 24px; }
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+  @keyframes pulse-dot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%       { transform: scale(1.5); opacity: 0.5; }
+  }
+  @keyframes ticker-scroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  @keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+  @keyframes countUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-6px); }
+  }
+
+  /* Hero entrance */
+  .hero-badge  { animation: fadeIn 0.6s ease both; }
+  .hero h1     { animation: fadeUp 0.7s 0.1s ease both; }
+  .hero p      { animation: fadeUp 0.7s 0.2s ease both; }
+  .hero-stats  { animation: fadeUp 0.7s 0.35s ease both; }
+
+  /* Floating orbs in hero */
+  .hero::before { animation: float 6s ease-in-out infinite; }
+  .hero::after  { animation: float 8s 1s ease-in-out infinite; }
+
+  /* Pulsing dot in section labels */
+  .section-label .dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+  /* Scroll-reveal: cards start hidden */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Stagger children inside a reveal-group */
+  .reveal-group .rule-card:nth-child(1) { transition-delay: 0.05s; }
+  .reveal-group .rule-card:nth-child(2) { transition-delay: 0.12s; }
+  .reveal-group .rule-card:nth-child(3) { transition-delay: 0.19s; }
+  .reveal-group .rule-card:nth-child(4) { transition-delay: 0.26s; }
+  .reveal-group .rule-card:nth-child(5) { transition-delay: 0.33s; }
+  .reveal-group .rule-card:nth-child(6) { transition-delay: 0.40s; }
+  .reveal-group .rule-card { opacity: 0; transform: translateY(24px); transition: opacity 0.5s ease, transform 0.5s ease; }
+  .reveal-group.visible .rule-card { opacity: 1; transform: translateY(0); }
+
+  /* Card hover glow */
+  .rule-card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(0,0,0,0.1); }
+  .rule-card { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+
+  /* ── LIVE STOCK TICKER BAR ── */
+  .stock-ticker-bar {
+    background: #04342C;
+    color: white;
+    padding: 10px 0;
+    overflow: hidden;
+    position: relative;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .stock-ticker-bar::before,
+  .stock-ticker-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 60px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .stock-ticker-bar::before { left: 0; background: linear-gradient(to right, #04342C, transparent); }
+  .stock-ticker-bar::after  { right: 0; background: linear-gradient(to left, #04342C, transparent); }
+  .ticker-track {
+    display: flex;
+    gap: 0;
+    width: max-content;
+    animation: ticker-scroll 38s linear infinite;
+  }
+  .ticker-track:hover { animation-play-state: paused; }
+  .stock-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 28px;
+    font-size: 13px;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    white-space: nowrap;
+  }
+  .stock-chip .sym  { font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+  .stock-chip .price { color: rgba(255,255,255,0.75); }
+  .stock-chip .chg  { font-weight: 600; font-size: 12px; padding: 2px 7px; border-radius: 4px; }
+  .chg.up   { background: rgba(29,158,117,0.25); color: #5DCAA5; }
+  .chg.down { background: rgba(216,90,48,0.25);  color: #F09595; }
+
+  /* Live dot */
+  .live-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(29,158,117,0.2);
+    border: 1px solid rgba(29,158,117,0.4);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #5DCAA5;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #5DCAA5;
+    animation: pulse-dot 1.2s ease-in-out infinite;
+  }
+
+  /* Navbar slide-in */
+  nav.nav-pills { animation: fadeIn 0.5s 0.4s ease both; }
+
+  /* Quote band pop */
+  .quote-band { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+  .quote-band:hover { transform: scale(1.01); box-shadow: 0 12px 32px rgba(0,0,0,0.07); }
+
+  /* Check items stagger on scroll */
+  .checklist .check-item {
+    opacity: 0;
+    transform: translateX(-16px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .checklist.visible .check-item { opacity: 1; transform: translateX(0); }
+  .checklist.visible .check-item:nth-child(1)  { transition-delay: 0.02s; }
+  .checklist.visible .check-item:nth-child(2)  { transition-delay: 0.06s; }
+  .checklist.visible .check-item:nth-child(3)  { transition-delay: 0.10s; }
+  .checklist.visible .check-item:nth-child(4)  { transition-delay: 0.14s; }
+  .checklist.visible .check-item:nth-child(5)  { transition-delay: 0.18s; }
+  .checklist.visible .check-item:nth-child(6)  { transition-delay: 0.22s; }
+  .checklist.visible .check-item:nth-child(7)  { transition-delay: 0.26s; }
+  .checklist.visible .check-item:nth-child(8)  { transition-delay: 0.30s; }
+  .checklist.visible .check-item:nth-child(9)  { transition-delay: 0.34s; }
+  .checklist.visible .check-item:nth-child(10) { transition-delay: 0.38s; }
+
+  /* ── CUSTOM CURSOR ── */
+  * { cursor: none !important; }
+  #cursor-man {
+    position: fixed;
+    width: 28px;
+    height: 36px;
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(0, -4px);
+    transition: transform 0.1s ease;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+  }
+  #cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 2px solid rgba(29,158,117,0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99998;
+    transform: translate(-50%,-50%);
+    transition: left 0.15s ease, top 0.15s ease, width 0.25s ease, height 0.25s ease, border-color 0.25s ease;
+  }
+  body.cursor-hover #cursor-man { transform: translate(0,-8px) scale(1.18); filter: drop-shadow(0 6px 14px rgba(29,158,117,0.5)); }
+  body.cursor-hover #cursor-ring { width: 56px; height: 56px; border-color: rgba(184,115,51,0.5); }
+  body.cursor-click #cursor-man { transform: translate(0,-4px) scale(0.9) rotate(-12deg); }
+
+  /* Walking animation — removed, statue is still */
+  #cursor-man { animation: none; }
+  body.cursor-hover #cursor-man { animation: none; }
+
+  /* ── PARTICLE CANVAS ── */
+  #particle-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.35;
+  }
+
+  /* ── HERO PARTICLES OVERLAY ── */
+  .hero { position: relative; z-index: 1; }
+  .hero > * { position: relative; z-index: 2; }
+
+  /* ── GRADIENT TEXT ── */
+  @keyframes gradientShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .hero h1 {
+    background: linear-gradient(90deg, #ffffff, #5DCAA5, #B87333, #ffffff);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: fadeUp 0.7s 0.1s ease both, gradientShift 6s ease infinite;
+  }
+
+  /* ── RIPPLE on click ── */
+  .ripple {
+    position: fixed;
+    border-radius: 50%;
+    background: rgba(29,158,117,0.25);
+    transform: scale(0);
+    animation: rippleOut 0.6s ease-out forwards;
+    pointer-events: none;
+    z-index: 99996;
+  }
+  @keyframes rippleOut {
+    to { transform: scale(4); opacity: 0; }
+  }
+
+  /* ── TYPEWRITER for section-sub ── */
+  .typewriter-done { border-right: none !important; }
+
+  /* ── GOLDEN RULE slide-in from left ── */
+  .golden-rule {
+    opacity: 0;
+    transform: translateX(-30px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .golden-rules.visible .golden-rule { opacity: 1; transform: translateX(0); }
+  .golden-rules.visible .golden-rule:nth-child(1) { transition-delay: 0.05s; }
+  .golden-rules.visible .golden-rule:nth-child(2) { transition-delay: 0.15s; }
+  .golden-rules.visible .golden-rule:nth-child(3) { transition-delay: 0.25s; }
+  .golden-rules.visible .golden-rule:nth-child(4) { transition-delay: 0.35s; }
+  .golden-rules.visible .golden-rule:nth-child(5) { transition-delay: 0.45s; }
+
+  /* ── MISTAKE items slide from right ── */
+  .mistake-item {
+    opacity: 0;
+    transform: translateX(30px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+  }
+  .mistakes-list.visible .mistake-item { opacity: 1; transform: translateX(0); }
+  .mistakes-list.visible .mistake-item:nth-child(1) { transition-delay: 0.04s; }
+  .mistakes-list.visible .mistake-item:nth-child(2) { transition-delay: 0.10s; }
+  .mistakes-list.visible .mistake-item:nth-child(3) { transition-delay: 0.16s; }
+  .mistakes-list.visible .mistake-item:nth-child(4) { transition-delay: 0.22s; }
+  .mistakes-list.visible .mistake-item:nth-child(5) { transition-delay: 0.28s; }
+  .mistakes-list.visible .mistake-item:nth-child(6) { transition-delay: 0.34s; }
+
+  /* ── SECTION TITLE underline sweep ── */
+  .section-title {
+    display: inline-block;
+    position: relative;
+  }
+  .section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0;
+    width: 0; height: 3px;
+    background: linear-gradient(90deg, var(--green), var(--amber));
+    border-radius: 2px;
+    transition: width 0.7s ease;
+  }
+  .reveal-group.visible ~ * .section-title::after,
+  section.in-view .section-title::after { width: 100%; }
+
+  /* ── FOOTER wave ── */
+  @keyframes waveIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  footer { animation: waveIn 0.8s ease both; }
+
+  /* ── GLOW on nav-pill active ── */
+  .nav-pill.active {
+    background: var(--green);
+    color: white;
+    border-color: var(--green);
+    box-shadow: 0 0 12px rgba(29,158,117,0.4);
+  }
+
+  /* ── SPARKLE elements ── */
+  .sparkle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 99995;
+    font-size: 14px;
+    animation: sparkleFade 0.8s ease-out forwards;
+  }
+  @keyframes sparkleFade {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-40px) scale(0.3); }
+  }
+
+  /* ── GLITCH EFFECT ── */
+  @keyframes glitch1 {
+    0%,100% { clip-path: inset(0 0 95% 0); transform: translate(-3px,0); }
+    20%      { clip-path: inset(30% 0 50% 0); transform: translate(3px,0); }
+    40%      { clip-path: inset(60% 0 20% 0); transform: translate(-2px,0); }
+    60%      { clip-path: inset(10% 0 80% 0); transform: translate(2px,0); }
+    80%      { clip-path: inset(80% 0 5% 0);  transform: translate(-3px,0); }
+  }
+  @keyframes glitch2 {
+    0%,100% { clip-path: inset(50% 0 30% 0); transform: translate(3px,0); color:#5DCAA5; }
+    25%      { clip-path: inset(10% 0 70% 0); transform: translate(-3px,0); color:#B87333; }
+    50%      { clip-path: inset(70% 0 10% 0); transform: translate(2px,0);  color:#5DCAA5; }
+    75%      { clip-path: inset(20% 0 60% 0); transform: translate(-2px,0); color:#B87333; }
+  }
+  #glitch-title { position: relative; }
+  #glitch-title::before,
+  #glitch-title::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0; width: 100%;
+    background: linear-gradient(90deg,#ffffff,#5DCAA5,#B87333,#ffffff);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0;
+    pointer-events: none;
+  }
+  #glitch-title.glitching::before { opacity:1; animation: glitch1 0.35s steps(2) forwards; }
+  #glitch-title.glitching::after  { opacity:1; animation: glitch2 0.35s steps(2) forwards; }
+
+  /* ── WORD FLIP ── */
+  @keyframes wordFlipIn {
+    from { opacity:0; transform: rotateX(-90deg) translateY(-10px); }
+    to   { opacity:1; transform: rotateX(0deg) translateY(0); }
+  }
+  @keyframes wordFlipOut {
+    from { opacity:1; transform: rotateX(0deg) translateY(0); }
+    to   { opacity:0; transform: rotateX(90deg) translateY(10px); }
+  }
+  #word-flip { perspective: 400px; transform-style: preserve-3d; }
+  #word-flip.flip-out { animation: wordFlipOut 0.3s ease forwards; }
+  #word-flip.flip-in  { animation: wordFlipIn  0.3s ease forwards; }
+
+  /* ── TYPEWRITER CURSOR ── */
+  #typewriter-text::after {
+    content: '|';
+    animation: blink 0.75s step-end infinite;
+    color: #5DCAA5;
+    font-weight: 300;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ── PARALLAX SECTIONS ── */
+  .parallax-bg {
+    background-attachment: fixed;
+    background-size: cover;
+  }
+
+  /* ── SECTION FADE TRANSITION ── */
+  section {
+    transition: opacity 0.4s ease;
+  }
+
+  /* ── CANDLESTICK CHART SECTION ── */
+  #candlestick-section {
+    background: #04342C;
+    padding: 48px 0;
+    margin: 0;
+    border-top: none;
+  }
+  #candlestick-section .container { position: relative; }
+  #candleChart {
+    width: 100%;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .chart-label {
+    color: rgba(255,255,255,0.5);
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+  .chart-title {
+    font-family: 'Playfair Display', serif;
+    color: white;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .chart-sub { color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<!-- CUSTOM CURSOR: Statue Gentleman -->
+<svg id="cursor-man" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 80" fill="none">
+  <!-- Top Hat brim -->
+  <ellipse cx="26" cy="15" rx="13" ry="3" fill="#2a2a2a"/>
+  <!-- Top Hat body -->
+  <path d="M14 15 Q14 3 26 3 Q38 3 38 15 Z" fill="#1a1a1a"/>
+  <!-- Hat ribbon -->
+  <path d="M14 14 Q26 11 38 14" stroke="#B87333" stroke-width="2.5" fill="none"/>
+  <!-- Neck -->
+  <path d="M23 31 Q26 33 29 31 L29 35 Q26 37 23 35 Z" fill="#f0c898"/>
+  <!-- Head -->
+  <path d="M17 22 Q17 12 26 12 Q35 12 35 22 Q35 31 26 32 Q17 31 17 22 Z" fill="#f5d5a8"/>
+  <!-- Hair (sides) -->
+  <path d="M17 20 Q16 15 18 13" stroke="#5C3010" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M35 20 Q36 15 34 13" stroke="#5C3010" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Left eye -->
+  <ellipse cx="22" cy="21" rx="1.8" ry="2" fill="#2a1a0a"/>
+  <ellipse cx="22.5" cy="20.5" rx="0.6" ry="0.6" fill="white"/>
+  <!-- Right eye -->
+  <ellipse cx="30" cy="21" rx="1.8" ry="2" fill="#2a1a0a"/>
+  <ellipse cx="30.5" cy="20.5" rx="0.6" ry="0.6" fill="white"/>
+  <!-- Eyebrows -->
+  <path d="M20 18.5 Q22 17.5 24 18.5" stroke="#5C3010" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <path d="M28 18.5 Q30 17.5 32 18.5" stroke="#5C3010" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <!-- Monocle -->
+  <circle cx="30" cy="21" r="4" fill="none" stroke="#B87333" stroke-width="1"/>
+  <line x1="34" y1="23" x2="35" y2="27" stroke="#B87333" stroke-width="0.8"/>
+  <!-- Nose -->
+  <path d="M25 23 Q24 26 26 27 Q28 26 27 23" fill="#e8b87a" stroke="none"/>
+  <!-- Moustache -->
+  <path d="M21 28 Q23 26.5 26 27.5 Q29 26.5 31 28" stroke="#5C3010" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <!-- Smile -->
+  <path d="M23 29.5 Q26 31.5 29 29.5" stroke="#c87850" stroke-width="1" fill="none" stroke-linecap="round"/>
+  <!-- White collar -->
+  <path d="M20 35 L26 38 L32 35 L32 37 L26 40 L20 37 Z" fill="white"/>
+  <!-- Shirt / chest centre -->
+  <path d="M22 38 L26 40 L30 38 L30 48 L22 48 Z" fill="#f8f8f8"/>
+  <!-- Tie -->
+  <path d="M25 37 L24.2 44 L26 46 L27.8 44 L27 37 Q26.5 36 26 36.5 Q25.5 36 25 37 Z" fill="#c0392b"/>
+  <path d="M25.2 37 L26 39 L26.8 37" fill="#922b21"/>
+  <!-- Suit jacket -->
+  <path d="M20 35 L10 72 L22 72 L24 48 L22 38 Z" fill="#1a1f3a"/>
+  <path d="M32 35 L42 72 L30 72 L28 48 L30 38 Z" fill="#1a1f3a"/>
+  <!-- Jacket lapels -->
+  <path d="M20 35 L22 38 L18 44 Z" fill="#252b4a"/>
+  <path d="M32 35 L30 38 L34 44 Z" fill="#252b4a"/>
+  <!-- Pocket square -->
+  <path d="M31 36 L34 36 L33.5 39 L32 37.5 Z" fill="#5DCAA5"/>
+  <!-- Waistcoat / vest -->
+  <path d="M22 38 L24 48 L28 48 L30 38 L28 40 L26 41 L24 40 Z" fill="#2c3358"/>
+  <!-- Waistcoat buttons -->
+  <circle cx="26" cy="42" r="0.8" fill="#B87333"/>
+  <circle cx="26" cy="45" r="0.8" fill="#B87333"/>
+  <!-- Left arm straight down with cane -->
+  <path d="M20 37 Q14 42 12 55 Q11 62 12 68" stroke="#1a1f3a" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <!-- Left hand -->
+  <circle cx="12" cy="69" r="3.2" fill="#f5d5a8"/>
+  <!-- Cane -->
+  <path d="M13 71 Q14 75 15 78" stroke="#8B5E3C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M13 78 Q15 79 17 77" stroke="#8B5E3C" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Right arm slightly out -->
+  <path d="M32 37 Q38 42 40 55 Q41 61 40 67" stroke="#1a1f3a" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <!-- Right hand -->
+  <circle cx="40" cy="68" r="3.2" fill="#f5d5a8"/>
+  <!-- Trouser left -->
+  <path d="M22 68 Q20 70 20 72 L24 72 Q25 70 24 68 Z" fill="#111827"/>
+  <!-- Trouser right -->
+  <path d="M30 68 Q32 70 32 72 L28 72 Q27 70 28 68 Z" fill="#111827"/>
+  <!-- Left shoe -->
+  <path d="M18 72 Q17 74 16 75 Q18 76 22 75 L22 72 Z" fill="#0d0d0d"/>
+  <!-- Right shoe -->
+  <path d="M34 72 Q35 74 36 75 Q34 76 30 75 L30 72 Z" fill="#0d0d0d"/>
+  <!-- Watch chain -->
+  <path d="M26 41 Q29 42 30 44" stroke="#B87333" stroke-width="0.8" stroke-dasharray="1.5,1" fill="none"/>
+  <circle cx="30.5" cy="44.5" r="1.2" fill="#B87333"/>
+</svg>
+<div id="cursor-ring"></div>
+
+<canvas id="particle-canvas"></canvas>
+
+<!-- QUOTE BANNER -->
+<div style="background:#B87333; color:#ffffff; text-align:center; padding: 14px 20px;">
+  <span style="font-family:'Playfair Display',serif; font-size:1rem; font-style:italic;">"Wait, is it time for dye?"</span>
+  <span style="font-size:0.85rem; font-weight:600; margin-left:10px;">— G.M. Zakir Sait</span>
+</div>
+
+<!-- LIVE STOCK TICKER -->
+<div class="stock-ticker-bar">
+  <div class="ticker-track" id="tickerTrack">
+    <!-- filled by JS -->
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div style="margin-bottom:20px;"><span class="live-badge"><span class="live-dot"></span>Live Market</span></div>
+  <div class="hero-badge">Investor's Handbook</div>
+  <h1 id="glitch-title" data-text="Rules to Make Profit in the Stock Market">Rules to Make Profit in the Stock Market</h1>
+  <p id="typewriter-text"></p>
+  <div style="margin:8px 0 24px;font-size:1.1rem;color:rgba(255,255,255,0.85);font-weight:300;">
+    Master the art of&nbsp;
+    <span id="word-flip" style="color:#5DCAA5;font-weight:600;display:inline-block;min-width:100px;">Profit</span>
+  </div>
+  <!-- MINI STOCK CHART -->
+  <div style="margin:0 auto 28px;max-width:480px;position:relative;z-index:2;">
+    <canvas id="heroChart" height="70" style="width:100%;border-radius:10px;opacity:0.85;"></canvas>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="num">10+</span><span class="lbl">Golden Rules</span></div>
+    <div class="hero-stat"><span class="num">3</span><span class="lbl">Core Strategies</span></div>
+    <div class="hero-stat"><span class="num">100%</span><span class="lbl">Discipline Driven</span></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav-pills">
+  <a class="nav-pill" href="#zakir-profile">G.M. Zakir Sait</a>
+  <a class="nav-pill" href="#zakir-rules">Zakir Sait's Rules</a>
+  <a class="nav-pill" href="#fundamentals">Fundamentals</a>
+  <a class="nav-pill" href="#golden-rules">Golden Rules</a>
+  <a class="nav-pill" href="#strategy">Strategy</a>
+  <a class="nav-pill" href="#legends">Legends</a>
+  <a class="nav-pill" href="#mistakes">Mistakes</a>
+  <a class="nav-pill" href="#checklist">Daily Checklist</a>
+</nav>
+
+<div class="container">
+
+  <!-- SECTION: G.M. ZAKIR SAIT PROFILE -->
+  <section id="zakir-profile">
+    <div style="display:flex;align-items:center;gap:40px;flex-wrap:wrap;" class="reveal">
+      <div style="flex-shrink:0;text-align:center;">
+        <div style="width:200px;height:200px;border-radius:50%;overflow:hidden;border:4px solid #B87333;box-shadow:0 12px 40px rgba(184,115,51,0.3);margin:0 auto 16px;">
+          <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAIEAggDASIAAhEBAxEB/8QAHQAAAQUBAQEBAAAAAAAAAAAABQABAgMEBgcICf/EAEkQAAEDAwIDBAYHBwIFAgYDAAEAAgMEBRESIQYxQRMiUWEHFCMycYEzQlJTkZKxCBUkNGJyoSWyFjVDgsFj0SY2VHOz4UR08P/EABsBAAIDAQEBAAAAAAAAAAAAAAACAQMEBQYH/8QAJxEAAgICAwABBAMBAQEAAAAAAAECEQMhBBIxEwUiMkEzUXEUQiP/2gAMAwEAAhEDEQA/APkn1mo+/l/OUvWaj7+X85VSSSwLvWKj7+X85S9YqPv5fzlVJIsC4VFRj6eX85T+sVH38v5yqhySRZJb6xUffy/nKdtRP99J+YqlSaiwLu3n++k/MVLt5vvpPzFUBTUNsZFnbzffSfmKftpvvZPzFVKQS2yaLO2m+9k/MUzppvvpPzFQSRbBoczz/fSfmKj28/30n5ikQo4RbEJdvP8AfSfmKl20/wB9J+YqsBSARbJJ9tN97J+YpNtP97J+YqOEsItjUWNmmx9LJ+Yp+2m+9f8AmKrCdFsKJPmmxtLJ+YqImn++k/MUxGU4amTYsvR+2m++k/MU7J5zykef+4paM7eKtgpxDvJM1g+yeZU2KRMs+MiR2fAuSa6oJy6WQHwDjhbWNinGIrVUPd94HbLdS2WvkjDm07ww+IUNslI5+SScP+mlx/cVdLNK6JobI8HO+HLraXhUTDM/d+Ksl4ct1KMula4nzS2x6OLZLUfbkP8A3FXMNW8hre0yeW5XSGkoondxoctsDWhvcpznocIthRzTLdc5CxgDg4jPvFaH8PXwta9rXYJx75XVNqpopI9MOXBuM4Wlt2uVPHGZI+7qzjSktj0jz6ppq+ke5kjJy4HfmQs7HVLSXSPkb5Eleqm9U0+O3p2nPPYLLcrTZrojV2YB8ii2FI80NQ4Akyu8sOUYZpJHfSvx/cV3X/BluljLacaXDxOcoRW8GXKlcXQscW+TVPZkNAGZ3d0tnlD/AIlTbK5se73E/FapOHroHa3wvwPJY5qWWB2mUEKezIorbNKXH2j/AMxTGWXP0j/zFQk7vupKVIWUSfay/eP/ADFLtZfvH/mKgkp7EUOZpfvX/mKi6abH0sn5imKg/kotgxGefH00n5imM8/30n5ioHkmKLYpd28/30n5il28/wB9J+YqtJFsCzt5/vpPzFOJpvvpPzFVgKYCi2WJEjNN99J+Ypu1n++k/MUsZS0othQ4lmz9NJ+YpOmm+9k/MUg3dM4ItkpETPP99J+YqYmmx9LJ+YqohWAbItk0S7ab72T8xUTNN99J+YpYTOCE2FCM8/30n5imMc+fpoPzFMQogbqbYtFvbzffSfmKXbzffSfmKrSRbAo7eX76T8xQ4lm+9k/MU9I/BHNRbJI0KQ5qIcVBzVAEDzSTBx2UQ4oAbA3WkE2FLSoigE0ppUCVByUAaWEyQE7R8E2VNADpFJ+yR5KIQKE3kk0gE5RRjRSSTyCdNRJNGFRHZARGiUkR3CKQKKCKA//Z" alt="G.M. Zakir Sait" style="width:100%;height:100%;object-fit:cover;object-position:top center;"/>
+        </div>
+        <div style="display:inline-flex;align-items:center;gap:6px;background:#E1F5EE;border:1px solid #9FE1CB;border-radius:999px;padding:5px 14px;font-size:12px;font-weight:600;color:#04342C;">
+          <span style="width:6px;height:6px;border-radius:50%;background:#1D9E75;display:inline-block;"></span>
+          Investor & Mentor
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px;">
+        <span class="section-label"><span class="dot"></span>Featured Investor</span>
+        <h2 class="section-title" style="margin-bottom:12px;">G.M. Zakir Sait</h2>
+        <p style="color:var(--muted);font-size:0.95rem;margin-bottom:20px;line-height:1.8;">A seasoned investor and market mentor known for his sharp technical eye and disciplined approach to trading. G.M. Zakir Sait has developed a precise set of entry rules that combine price action, RSI analysis, and candle structure to identify high-probability trades.</p>
+        <div style="background:linear-gradient(135deg,#F5EBE0,#fdf6ee);border-left:4px solid #B87333;border-radius:0 12px 12px 0;padding:20px 24px;margin-bottom:20px;">
+          <div style="font-size:2rem;color:#B87333;font-family:'Playfair Display',serif;line-height:1;margin-bottom:6px;">"</div>
+          <p style="font-family:'Playfair Display',serif;font-style:italic;font-size:1.15rem;color:#2C2C2A;line-height:1.6;margin-bottom:8px;">Wait, is it time for dye?</p>
+          <span style="font-size:0.85rem;font-weight:600;color:#B87333;">— G.M. Zakir Sait</span>
+        </div>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;">
+          <div style="text-align:center;">
+            <div style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:#1D9E75;">5</div>
+            <div style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Trading Rules</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:#B87333;">12</div>
+            <div style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Candle Rule</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:#D85A30;">RSI</div>
+            <div style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Core Indicator</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION: ZAKIR SAIT'S RULES -->
+  <section id="zakir-rules">
+    <span class="section-label"><span class="dot"></span>G.M. Zakir Sait's Rules</span>
+    <h2 class="section-title">Trading Rules by G.M. Zakir Sait</h2>
+    <p class="section-sub">A set of precise, technical rules for disciplined market entry — built on price action, RSI, and candle structure.</p>
+
+    <div class="rules-grid">
+      <div class="rule-card accent-coral">
+        <div class="rule-num">01</div>
+        <div class="rule-icon">🚫</div>
+        <h3>Never Buy in a Down or Flat Market</h3>
+        <p>Avoid entering a trade when the market is falling or moving sideways. Buying in weakness means fighting the trend — wait for clear directional strength before committing.</p>
+      </div>
+      <div class="rule-card accent-green">
+        <div class="rule-num">02</div>
+        <div class="rule-icon">🟢</div>
+        <h3>Buy Only When the Market is Up</h3>
+        <p>Enter trades only when the market is in an upward move. Buying in the direction of momentum increases the probability of a successful trade significantly.</p>
+      </div>
+      <div class="rule-card accent-blue">
+        <div class="rule-num">03</div>
+        <div class="rule-icon">📉</div>
+        <h3>RSI Must Cross Above the SMA</h3>
+        <p>The RSI line should cross above its Simple Moving Average (SMA) before entry. This crossover signals a shift in momentum from weak to strong — a key confirmation trigger.</p>
+      </div>
+      <div class="rule-card accent-amber">
+        <div class="rule-num">04</div>
+        <div class="rule-icon">🔺</div>
+        <h3>RSI Must Break Above Previous High</h3>
+        <p>The RSI should also exceed its most recent swing high. This confirms that bullish momentum is accelerating, not just recovering — a stronger signal for a high-quality entry.</p>
+      </div>
+      <div class="rule-card accent-green" style="grid-column: span 2;">
+        <div class="rule-num">05</div>
+        <div class="rule-icon">🦶</div>
+        <h3>Right Foot Rule — Max 12 Candles</h3>
+        <p>The most recent bullish move (before the current pullback) must have occurred within the last 12 candles. If the market's last "up leg" is more than 12 candles behind, the setup is too old and the momentum has likely faded. Only trade when the bullish structure is fresh and recent.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 1: FUNDAMENTALS -->
+  <section id="fundamentals">
+    <span class="section-label"><span class="dot"></span>The Basics</span>
+    <h2 class="section-title">Core Fundamentals Every Investor Must Know</h2>
+    <p class="section-sub">Before you invest a single rupee or dollar, understand these foundational concepts that govern every profitable decision.</p>
+
+    <div class="rules-grid reveal-group">
+      <div class="rule-card accent-green">
+        <div class="rule-num">01</div>
+        <div class="rule-icon">📈</div>
+        <h3>Understand What You Buy</h3>
+        <p>Never invest in a company you don't understand. Study the business model, revenue sources, and competitive advantages before committing capital.</p>
+      </div>
+      <div class="rule-card accent-blue">
+        <div class="rule-num">02</div>
+        <div class="rule-icon">⏳</div>
+        <h3>Time in Market Beats Timing</h3>
+        <p>Staying invested consistently over years outperforms trying to predict short-term market movements. Compounding rewards patience.</p>
+      </div>
+      <div class="rule-card accent-amber">
+        <div class="rule-num">03</div>
+        <div class="rule-icon">🎯</div>
+        <h3>Set Clear Goals</h3>
+        <p>Define your financial goals — retirement, education, wealth creation — and align your investment strategy to your timeline and risk appetite.</p>
+      </div>
+      <div class="rule-card accent-coral">
+        <div class="rule-num">04</div>
+        <div class="rule-icon">🛡️</div>
+        <h3>Capital Preservation First</h3>
+        <p>Protecting your principal is more important than chasing returns. Losing 50% requires a 100% gain just to break even. Never risk more than you can afford to lose.</p>
+      </div>
+      <div class="rule-card accent-green">
+        <div class="rule-num">05</div>
+        <div class="rule-icon">📊</div>
+        <h3>Read Financial Statements</h3>
+        <p>Learn to read balance sheets, P&L statements, and cash flow reports. Numbers tell the real story of a company's health.</p>
+      </div>
+      <div class="rule-card accent-blue">
+        <div class="rule-num">06</div>
+        <div class="rule-icon">🌐</div>
+        <h3>Diversify Across Sectors</h3>
+        <p>Don't concentrate in one sector. Spread investments across industries so a downturn in one doesn't wipe out your entire portfolio.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: GOLDEN RULES -->
+  <section id="golden-rules">
+    <span class="section-label"><span class="dot"></span>Elite Principles</span>
+    <h2 class="section-title">The Golden Rules of Profitable Investing</h2>
+    <p class="section-sub">These timeless rules have guided the world's greatest investors — from Warren Buffett to Rakesh Jhunjhunwala.</p>
+
+    <div class="golden-rules reveal">
+      <div class="golden-rule">
+        <div class="rule-badge" style="background:#E1F5EE;">💰</div>
+        <div>
+          <h3>Buy Low, Sell High — But Know What "Low" Means</h3>
+          <p>Don't buy stocks that are cheap for bad reasons. Focus on companies trading below their intrinsic value due to temporary market fear, not structural problems.</p>
+          <div class="tip" style="background:#E1F5EE; color:#085041;">Tip: Use P/E ratio, P/B ratio, and DCF analysis to estimate intrinsic value.</div>
+        </div>
+      </div>
+
+      <div class="golden-rule">
+        <div class="rule-badge" style="background:#F5EBE0;">🔄</div>
+        <div>
+          <h3>Reinvest Your Dividends</h3>
+          <p>Dividends reinvested compound your wealth exponentially over time. This is one of the most underrated strategies for long-term wealth building.</p>
+          <div class="tip" style="background:#F5EBE0; color:#5C2D0A;">Tip: In India, DRIP (Dividend Reinvestment Plans) can amplify CAGR significantly.</div>
+        </div>
+      </div>
+
+      <div class="golden-rule">
+        <div class="rule-badge" style="background:#FAECE7;">✂️</div>
+        <div>
+          <h3>Cut Losses, Let Winners Run</h3>
+          <p>Set a stop-loss discipline. Exit losing trades before small losses become catastrophic. Conversely, don't book profits too early from fundamentally strong stocks.</p>
+          <div class="tip" style="background:#FAECE7; color:#4A1B0C;">Tip: Many successful traders use a 7–8% stop-loss rule as a standard practice.</div>
+        </div>
+      </div>
+
+      <div class="golden-rule">
+        <div class="rule-badge" style="background:#E6F1FB;">🧠</div>
+        <div>
+          <h3>Control Your Emotions — Fear and Greed are Enemies</h3>
+          <p>Markets are driven by emotion in the short term. The investor who can stay rational during crashes and euphoria gains a massive edge over the crowd.</p>
+          <div class="tip" style="background:#E6F1FB; color:#042C53;">Tip: Write down your investment thesis before buying. Review it when panic sets in.</div>
+        </div>
+      </div>
+
+      <div class="golden-rule">
+        <div class="rule-badge" style="background:#EAF3DE;">📅</div>
+        <div>
+          <h3>Use Systematic Investment (SIP) for Consistency</h3>
+          <p>Investing a fixed amount regularly — regardless of market conditions — averages your cost over time and removes the burden of market timing entirely.</p>
+          <div class="tip" style="background:#EAF3DE; color:#173404;">Tip: Even ₹5,000/month in an index fund over 20 years creates significant wealth via SIP.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUOTE -->
+    <div class="quote-band" style="margin-top:40px;">
+      <blockquote>"The stock market is a device for transferring money from the impatient to the patient."</blockquote>
+      <cite>— Warren Buffett</cite>
+    </div>
+  </section>
+
+  <!-- SECTION 3: STRATEGY -->
+  <section id="strategy">
+    <span class="section-label"><span class="dot"></span>Approach</span>
+    <h2 class="section-title">Three Proven Profit Strategies</h2>
+    <p class="section-sub">Pick a strategy that matches your temperament, time availability, and risk tolerance.</p>
+
+    <div class="strategy-grid reveal">
+      <div class="strategy-box" style="background:#E1F5EE; border-color: #9FE1CB;">
+        <h3 style="color:#04342C;">📦 Value Investing</h3>
+        <ul>
+          <li>Buy undervalued quality stocks</li>
+          <li>Hold for 3–10+ years</li>
+          <li>Focus on fundamentals</li>
+          <li>Ignore short-term noise</li>
+          <li>Reinvest dividends</li>
+          <li>Low transaction frequency</li>
+        </ul>
+      </div>
+      <div class="strategy-box" style="background:#F5EBE0; border-color: #C9956A;">
+        <h3 style="color:#5C2D0A;">🚀 Growth Investing</h3>
+        <ul>
+          <li>Buy high-growth potential companies</li>
+          <li>Focus on revenue growth rate</li>
+          <li>Accept higher valuations (P/E)</li>
+          <li>Target emerging sectors</li>
+          <li>Technology, pharma, EV sectors</li>
+          <li>Medium to long term horizon</li>
+        </ul>
+      </div>
+      <div class="strategy-box" style="background:#E6F1FB; border-color: #B5D4F4;">
+        <h3 style="color:#042C53;">📉 Index Investing</h3>
+        <ul>
+          <li>Buy Nifty/Sensex index funds</li>
+          <li>Lowest cost strategy</li>
+          <li>Market-matching returns</li>
+          <li>No stock-picking needed</li>
+          <li>Ideal for busy investors</li>
+          <li>Set-and-forget approach</li>
+        </ul>
+      </div>
+      <div class="strategy-box" style="background:#FAECE7; border-color: #F5C4B3;">
+        <h3 style="color:#4A1B0C;">📊 Momentum Trading</h3>
+        <ul>
+          <li>Trade short-term price trends</li>
+          <li>Use technical analysis</li>
+          <li>Strict stop-losses required</li>
+          <li>High discipline needed</li>
+          <li>Focus on volume & RSI signals</li>
+          <li>Not suitable for beginners</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4: MISTAKES -->
+  <section id="mistakes">
+    <span class="section-label"><span class="dot"></span>Warning Signs</span>
+    <h2 class="section-title">Mistakes That Kill Profits</h2>
+    <p class="section-sub">Avoid these common errors that cause most retail investors to lose money in the market.</p>
+
+    <div class="mistakes-list reveal">
+      <div class="mistake-item">
+        <div class="mistake-x">✕</div>
+        <div>
+          <h4>Investing on Tips &amp; Rumours</h4>
+          <p>Hot tips from social media, WhatsApp groups, or friends rarely hold up. Always do your own research before investing.</p>
+        </div>
+      </div>
+      <div class="mistake-item">
+        <div class="mistake-x">✕</div>
+        <div>
+          <h4>Overtrading and Excessive Churning</h4>
+          <p>Frequent buying and selling racks up brokerage fees, STT, and taxes — eating away at your returns even when you're "winning."</p>
+        </div>
+      </div>
+      <div class="mistake-item">
+        <div class="mistake-x">✕</div>
+        <div>
+          <h4>Investing Emergency Money</h4>
+          <p>Never invest money you might need within 1–2 years. Markets can stay down for extended periods and force you to sell at losses.</p>
+        </div>
+      </div>
+      <div class="mistake-item">
+        <div class="mistake-x">✕</div>
+        <div>
+          <h4>Ignoring Taxes &amp; Costs</h4>
+          <p>Short-term capital gains tax (STCG), long-term capital gains tax (LTCG), STT, and brokerage fees can significantly reduce actual returns.</p>
+        </div>
+      </div>
+      <div class="mistake-item">
+        <div class="mistake-x">✕</div>
+        <div>
+          <h4>Panic Selling During Corrections</h4>
+          <p>Markets correct regularly — 10–20% drops are normal. Selling in panic locks in losses and keeps you out when recovery happens.</p>
+        </div>
+      </div>
+      <div class="mistake-item">
+        <div class="mistake-x">✕</div>
+        <div>
+          <h4>Using Leverage You Don't Understand</h4>
+          <p>Margin trading and F&amp;O (Futures &amp; Options) can multiply both gains AND losses. They've wiped out many unprepared retail traders.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION: LEGENDARY INVESTORS -->
+  <section id="legends">
+    <span class="section-label"><span class="dot"></span>The Legends</span>
+    <h2 class="section-title">Rules from the World's Greatest Investors</h2>
+    <p class="section-sub">These individuals built billions and helped millions grow their wealth. Their rules are battle-tested across decades of markets.</p>
+
+    <!-- WARREN BUFFETT -->
+    <div style="margin-bottom:48px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1D9E75,#085041);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🧓</div>
+        <div>
+          <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;">Warren Buffett</h3>
+          <span style="font-size:0.82rem;color:var(--muted);">Chairman of Berkshire Hathaway · Net Worth ~$130B · 60+ years of market-beating returns</span>
+        </div>
+      </div>
+      <div class="rules-grid">
+        <div class="rule-card accent-green"><div class="rule-icon">📏</div><h3>Rule #1: Never Lose Money</h3><p>Rule #2: Never forget Rule #1. Capital preservation is the foundation of all wealth building. Avoid permanent loss at all costs.</p></div>
+        <div class="rule-card accent-green"><div class="rule-icon">🏰</div><h3>Buy Companies with Wide Moats</h3><p>Invest in businesses with durable competitive advantages — strong brands, low costs, network effects — that protect profits for decades.</p></div>
+        <div class="rule-card accent-green"><div class="rule-icon">😴</div><h3>Be Greedy When Others Are Fearful</h3><p>The best buying opportunities come during market panics and crashes. When everyone is selling out of fear, the best prices appear.</p></div>
+        <div class="rule-card accent-green"><div class="rule-icon">🪨</div><h3>Only Buy What You'd Hold Forever</h3><p>If you wouldn't be comfortable holding a stock for 10 years, don't hold it for 10 minutes. Long-term conviction beats short-term speculation.</p></div>
+      </div>
+    </div>
+
+    <!-- PETER LYNCH -->
+    <div style="margin-bottom:48px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#378ADD,#042C53);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📘</div>
+        <div>
+          <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;">Peter Lynch</h3>
+          <span style="font-size:0.82rem;color:var(--muted);">Manager of Fidelity Magellan Fund · Averaged 29.2% annual returns over 13 years</span>
+        </div>
+      </div>
+      <div class="rules-grid">
+        <div class="rule-card accent-blue"><div class="rule-icon">👁️</div><h3>Invest in What You Know</h3><p>Everyday consumers often spot great investments before Wall Street does. Use your own experience and observations as a research advantage.</p></div>
+        <div class="rule-card accent-blue"><div class="rule-icon">🔍</div><h3>Do Your Homework</h3><p>Never invest based on a tip alone. Understand the company's story, earnings growth, and why it will be worth more in the future.</p></div>
+        <div class="rule-card accent-blue"><div class="rule-icon">💎</div><h3>Find "Ten-Baggers" Early</h3><p>Look for small, undiscovered companies with strong growth potential. A stock that grows 10x is a ten-bagger — Lynch made his fortune finding them early.</p></div>
+        <div class="rule-card accent-blue"><div class="rule-icon">🧩</div><h3>Ignore Short-Term Market Noise</h3><p>The stock market is full of daily noise that doesn't matter. Focus on the underlying business — if it keeps growing, the stock will follow eventually.</p></div>
+      </div>
+    </div>
+
+    <!-- BENJAMIN GRAHAM -->
+    <div style="margin-bottom:48px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#B87333,#5C2D0A);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📚</div>
+        <div>
+          <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;">Benjamin Graham</h3>
+          <span style="font-size:0.82rem;color:var(--muted);">Father of Value Investing · Author of "The Intelligent Investor" · Mentor to Warren Buffett</span>
+        </div>
+      </div>
+      <div class="rules-grid">
+        <div class="rule-card accent-amber"><div class="rule-icon">🛡️</div><h3>Always Demand a Margin of Safety</h3><p>Only buy a stock when it trades significantly below its intrinsic value. This cushion protects you from errors in analysis and unexpected downturns.</p></div>
+        <div class="rule-card accent-amber"><div class="rule-icon">🤖</div><h3>Mr. Market is Your Servant, Not Advisor</h3><p>The market offers prices daily — sometimes rational, often emotional. Use its mood swings to your advantage. Never let it dictate your decisions.</p></div>
+        <div class="rule-card accent-amber"><div class="rule-icon">📐</div><h3>Separate Investment from Speculation</h3><p>An investment promises safety of principal and adequate return. Anything else is speculation. Know which one you're doing at all times.</p></div>
+        <div class="rule-card accent-amber"><div class="rule-icon">🏗️</div><h3>Focus on Net Asset Value</h3><p>Buy companies trading below their net asset value (book value). This deep value approach protects against downside and sets up strong gains.</p></div>
+      </div>
+    </div>
+
+    <!-- RAKESH JHUNJHUNWALA -->
+    <div style="margin-bottom:48px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#D85A30,#4A1B0C);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🇮🇳</div>
+        <div>
+          <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;">Rakesh Jhunjhunwala</h3>
+          <span style="font-size:0.82rem;color:var(--muted);">India's Big Bull · Turned ₹5,000 into ₹40,000+ crore · Icon of Indian stock markets</span>
+        </div>
+      </div>
+      <div class="rules-grid">
+        <div class="rule-card accent-coral"><div class="rule-icon">🇮🇳</div><h3>Bet on India's Long-Term Growth</h3><p>Believe in the macro story of your country. Jhunjhunwala's biggest wins came from betting on India's economic growth decades before it was obvious.</p></div>
+        <div class="rule-card accent-coral"><div class="rule-icon">💪</div><h3>Have Conviction and Hold Through Volatility</h3><p>He held Titan Company for over 20 years through multiple downturns. True wealth comes from conviction-based holding, not panic selling.</p></div>
+        <div class="rule-card accent-coral"><div class="rule-icon">🌱</div><h3>Identify Sectors Before They Boom</h3><p>Spot emerging industries early — retail, aviation, financials — before they become mainstream. Early entry multiplies returns dramatically.</p></div>
+        <div class="rule-card accent-coral"><div class="rule-icon">❤️</div><h3>Love the Market — Respect Its Power</h3><p>Never fight the market's direction. Respect its power while staying patient. The market rewards those who understand and work with it, not against it.</p></div>
+      </div>
+    </div>
+
+    <!-- GEORGE SOROS -->
+    <div style="margin-bottom:48px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#7B2FBE,#2D0A53);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">♟️</div>
+        <div>
+          <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;">George Soros</h3>
+          <span style="font-size:0.82rem;color:var(--muted);">Founder of Quantum Fund · "The Man Who Broke the Bank of England" · $1B profit in a single day</span>
+        </div>
+      </div>
+      <div class="rules-grid">
+        <div class="rule-card" style="border-left:3px solid #7B2FBE;"><div class="rule-icon" style="background:#F0E8FA;">🌍</div><h3>Markets Are Always Biased</h3><p>Markets never perfectly reflect reality — they are always influenced by participant bias. Find where the bias exists and position accordingly before it corrects.</p></div>
+        <div class="rule-card" style="border-left:3px solid #7B2FBE;"><div class="rule-icon" style="background:#F0E8FA;">📊</div><h3>It's Not Whether You're Right or Wrong</h3><p>What matters is how much you make when right and how little you lose when wrong. Asymmetric risk-reward is the key to big profits.</p></div>
+        <div class="rule-card" style="border-left:3px solid #7B2FBE;"><div class="rule-icon" style="background:#F0E8FA;">🔄</div><h3>Reflexivity — Prices Affect Fundamentals</h3><p>Rising stock prices can improve a company's fundamentals. Understand this feedback loop to anticipate market moves before they happen.</p></div>
+        <div class="rule-card" style="border-left:3px solid #7B2FBE;"><div class="rule-icon" style="background:#F0E8FA;">⚡</div><h3>When You See It — Act Big</h3><p>When a rare, high-conviction opportunity appears, commit fully. Soros bet $10B against the British pound because he was certain. Conviction must match position size.</p></div>
+      </div>
+    </div>
+
+    <!-- CHARLIE MUNGER -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#0F7173,#04342C);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🧠</div>
+        <div>
+          <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;">Charlie Munger</h3>
+          <span style="font-size:0.82rem;color:var(--muted);">Vice Chairman of Berkshire Hathaway · Buffett's partner · Pioneer of mental model investing</span>
+        </div>
+      </div>
+      <div class="rules-grid">
+        <div class="rule-card accent-green"><div class="rule-icon">🧱</div><h3>Invert, Always Invert</h3><p>Instead of asking "how do I succeed?" ask "what would make me fail?" Avoid stupidity consistently and success follows. Thinking backwards reveals hidden risks.</p></div>
+        <div class="rule-card accent-green"><div class="rule-icon">🗂️</div><h3>Build a Latticework of Mental Models</h3><p>Draw from psychology, economics, engineering, and history to make better decisions. No single discipline gives the full picture of a business or market.</p></div>
+        <div class="rule-card accent-green"><div class="rule-icon">⏳</div><h3>Patience is the Ultimate Edge</h3><p>Sit on your hands and wait for the perfect pitch. You don't have to swing at every opportunity — in investing, doing nothing is often the best action.</p></div>
+        <div class="rule-card accent-green"><div class="rule-icon">🌟</div><h3>Buy Great Companies at Fair Prices</h3><p>A wonderful company at a fair price beats a fair company at a wonderful price every time. Quality of the business matters more than cheapness of the stock.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: CHECKLIST -->
+  <section id="checklist">
+    <span class="section-label"><span class="dot"></span>Action Plan</span>
+    <h2 class="section-title">Your Pre-Investment Checklist</h2>
+    <p class="section-sub">Before placing any buy order, run through these questions to ensure you're making a disciplined, informed decision.</p>
+
+    <div class="checklist">
+      <div class="check-item"><div class="check-circle">✓</div>Do I understand the company's core business model?</div>
+      <div class="check-item"><div class="check-circle">✓</div>Have I reviewed the last 3 years of financial statements?</div>
+      <div class="check-item"><div class="check-circle">✓</div>Is the stock trading below or near its intrinsic value?</div>
+      <div class="check-item"><div class="check-circle">✓</div>Is the company debt level manageable and sustainable?</div>
+      <div class="check-item"><div class="check-circle">✓</div>What is my exit plan — both target price and stop-loss?</div>
+      <div class="check-item"><div class="check-circle">✓</div>Am I investing money I don't need for at least 3 years?</div>
+      <div class="check-item"><div class="check-circle">✓</div>Is this stock fitting within my overall portfolio allocation?</div>
+      <div class="check-item"><div class="check-circle">✓</div>Have I checked industry trends and sector outlook?</div>
+      <div class="check-item"><div class="check-circle">✓</div>Am I investing based on research, not emotion or FOMO?</div>
+      <div class="check-item"><div class="check-circle">✓</div>Do I have an emergency fund in place before this investment?</div>
+    </div>
+
+    <div class="quote-band" style="margin-top: 40px;">
+      <blockquote>"Risk comes from not knowing what you're doing."</blockquote>
+      <cite>— Warren Buffett</cite>
+    </div>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>Built for educational purposes only &nbsp;|&nbsp; <strong>Not financial advice</strong> &nbsp;|&nbsp; Always consult a SEBI-registered advisor before investing.</p>
+  <p style="margin-top: 8px; font-size: 0.78rem; opacity: 0.6;">© 2026 Stock Market Profit Rules &nbsp;·&nbsp; Knowledge is the best investment</p>
+</footer>
+
+<script>
+// ══════════════════════════════════════════
+// STOCK TICKER
+// ══════════════════════════════════════════
+const stocks = [
+  { sym:"RELIANCE",  price:2847.30, chg:+1.24 },
+  { sym:"TCS",       price:3921.15, chg:-0.38 },
+  { sym:"INFY",      price:1432.80, chg:+2.11 },
+  { sym:"HDFCBANK",  price:1678.50, chg:+0.73 },
+  { sym:"ICICIBANK", price:1124.60, chg:+1.55 },
+  { sym:"WIPRO",     price: 467.20, chg:-0.62 },
+  { sym:"TATAMOTORS",price: 902.45, chg:+3.02 },
+  { sym:"BAJFINANCE",price:6834.10, chg:-0.91 },
+  { sym:"NIFTY 50",  price:22485.0, chg:+0.84 },
+  { sym:"SENSEX",    price:74132.0, chg:+1.02 },
+  { sym:"S&P 500",   price:5248.0,  chg:+0.52 },
+  { sym:"NASDAQ",    price:16432.0, chg:-0.13 },
+  { sym:"APPLE",     price: 189.30, chg:+0.95 },
+  { sym:"MSFT",      price: 415.70, chg:+1.18 },
+  { sym:"GOOGLE",    price: 172.40, chg:-0.44 },
+  { sym:"AMAZON",    price: 186.90, chg:+2.03 },
+  { sym:"TESLA",     price: 177.60, chg:-1.82 },
+  { sym:"GOLD",      price:2341.50, chg:+0.31 },
+  { sym:"CRUDE OIL", price:  83.40, chg:-0.58 },
+  { sym:"ADANIPORTS",price:1287.0,  chg:+1.67 },
+];
+function buildTicker(data) {
+  const track = document.getElementById('tickerTrack');
+  if (!track) return;
+  const html = [...data, ...data].map(s => {
+    const up = s.chg >= 0;
+    return `<span class="stock-chip">
+      <span class="sym">${s.sym}</span>
+      <span class="price">${s.price.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+      <span class="chg ${up?'up':'down'}">${up?'▲':'▼'} ${Math.abs(s.chg).toFixed(2)}%</span>
+    </span>`;
+  }).join('');
+  track.innerHTML = html;
+}
+function flicker() {
+  stocks.forEach(s => {
+    s.price = Math.max(1, +(s.price + (Math.random()-0.48)*0.6).toFixed(2));
+    s.chg   = +(s.chg + (Math.random()-0.5)*0.05).toFixed(2);
+  });
+  buildTicker(stocks);
+}
+buildTicker(stocks);
+setInterval(flicker, 4000);
+
+// ══════════════════════════════════════════
+// CUSTOM CURSOR — Businessman
+// ══════════════════════════════════════════
+const cursorMan = document.getElementById('cursor-man');
+const ring  = document.getElementById('cursor-ring');
+let mx = -200, my = -200, rx = -200, ry = -200;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursorMan.style.left = (mx - 10) + 'px';
+  cursorMan.style.top  = (my - 68) + 'px';
+});
+
+// Ring lazily follows
+function animateRing() {
+  rx += (mx - rx) * 0.13;
+  ry += (my - ry) * 0.13;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+// Hover state
+document.querySelectorAll('a,button,.rule-card,.nav-pill,.stock-chip,.check-item,.mistake-item,.golden-rule').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+});
+
+// Click sparkle
+document.addEventListener('click', e => {
+  const r = document.createElement('div');
+  r.className = 'ripple';
+  r.style.cssText = `left:${e.clientX-20}px;top:${e.clientY-20}px;width:40px;height:40px;`;
+  document.body.appendChild(r);
+  setTimeout(() => r.remove(), 700);
+
+  const symbols = ['💰','📈','💎','✦','★','₹'];
+  const colors  = ['#1D9E75','#B87333','#378ADD','#D85A30','#5DCAA5'];
+  for (let i = 0; i < 6; i++) {
+    const sp = document.createElement('div');
+    sp.className = 'sparkle';
+    sp.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+    sp.style.color = colors[Math.floor(Math.random()*colors.length)];
+    sp.style.left  = (e.clientX + (Math.random()-0.5)*60) + 'px';
+    sp.style.top   = (e.clientY + (Math.random()-0.5)*60) + 'px';
+    document.body.appendChild(sp);
+    setTimeout(() => sp.remove(), 900);
+  }
+
+  document.body.classList.add('cursor-click');
+  setTimeout(() => document.body.classList.remove('cursor-click'), 200);
+});
+
+// ══════════════════════════════════════════
+// FLOATING PARTICLE BACKGROUND
+// ══════════════════════════════════════════
+const pCanvas = document.getElementById('particle-canvas');
+const pCtx    = pCanvas.getContext('2d');
+let particles = [];
+
+function resizeParticles() {
+  pCanvas.width  = window.innerWidth;
+  pCanvas.height = window.innerHeight;
+}
+resizeParticles();
+window.addEventListener('resize', resizeParticles);
+
+function createParticle() {
+  return {
+    x:    Math.random() * pCanvas.width,
+    y:    Math.random() * pCanvas.height,
+    r:    Math.random() * 2.5 + 0.5,
+    dx:   (Math.random()-0.5) * 0.4,
+    dy:   -Math.random() * 0.5 - 0.2,
+    life: Math.random(),
+    col:  Math.random() > 0.5 ? '29,158,117' : '184,115,51',
+  };
+}
+for (let i = 0; i < 70; i++) particles.push(createParticle());
+
+function drawParticles() {
+  pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+  particles.forEach((p, i) => {
+    p.x += p.dx; p.y += p.dy; p.life += 0.004;
+    if (p.y < -10 || p.life > 1) particles[i] = createParticle();
+    pCtx.beginPath();
+    pCtx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    pCtx.fillStyle = `rgba(${p.col},${0.12 + Math.sin(p.life*Math.PI)*0.18})`;
+    pCtx.fill();
+  });
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// ══════════════════════════════════════════
+// SCROLL REVEAL
+// ══════════════════════════════════════════
+const revealEls = document.querySelectorAll('.reveal, .reveal-group, .checklist, .golden-rules, .mistakes-list');
+const observer  = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+  });
+}, { threshold: 0.1 });
+revealEls.forEach(el => observer.observe(el));
+
+// Section title underline on scroll
+const sectionTitles = document.querySelectorAll('.section-title');
+const titleObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.setProperty('--uw','100%');
+      e.target.style.cssText += '; --uw:100%;';
+      e.target.querySelector && null;
+      e.target.classList.add('title-in');
+    }
+  });
+}, { threshold: 0.5 });
+sectionTitles.forEach(el => {
+  el.style.transition = 'all 0.3s';
+  titleObs.observe(el);
+});
+// Use a simpler approach - add after-width via class
+document.querySelectorAll('.section-title').forEach(el => {
+  const obs2 = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      el.style.setProperty('--line-w','100%');
+      el.insertAdjacentHTML('beforeend','<span class="title-line" style="display:block;height:3px;background:linear-gradient(90deg,#1D9E75,#B87333);border-radius:2px;width:0;transition:width 0.7s ease 0.2s;margin-top:4px;"></span>');
+      setTimeout(() => { const ln = el.querySelector('.title-line'); if(ln) ln.style.width='60px'; }, 50);
+      obs2.disconnect();
+    }
+  },{ threshold:0.6 });
+  obs2.observe(el);
+});
+
+// ══════════════════════════════════════════
+// ACTIVE NAV PILL on scroll
+// ══════════════════════════════════════════
+const sections = document.querySelectorAll('section[id]');
+const pills    = document.querySelectorAll('.nav-pill');
+const navObs   = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      pills.forEach(p => p.classList.remove('active'));
+      const active = document.querySelector(`.nav-pill[href="#${e.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+},{ threshold:0.4 });
+sections.forEach(s => navObs.observe(s));
+
+// ══════════════════════════════════════════
+// COUNT-UP HERO STATS
+// ══════════════════════════════════════════
+function countUp(el, target, suffix='') {
+  let start = 0;
+  const step = target / 40;
+  const timer = setInterval(() => {
+    start += step;
+    if (start >= target) { start = target; clearInterval(timer); }
+    el.textContent = Math.floor(start) + suffix;
+  }, 35);
+}
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const nums = document.querySelectorAll('.hero-stat .num');
+    const targets = [10, 3, 100];
+    const suffixes = ['+', '', '%'];
+    nums.forEach((el, i) => countUp(el, targets[i], suffixes[i]));
+  }, 700);
+});
+
+// ══════════════════════════════════════════
+// 📊 MATRIX-STYLE NUMBER RAIN
+// on hovering the hero for 2s
+// ══════════════════════════════════════════
+const hero = document.querySelector('.hero');
+let matrixTimer = null, matrixActive = false;
+const matrixCanvas = document.createElement('canvas');
+matrixCanvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;border-radius:0;opacity:0.18;';
+hero.style.position = 'relative';
+hero.appendChild(matrixCanvas);
+const matrixCtx = matrixCanvas.getContext('2d');
+
+function resizeMatrix() {
+  matrixCanvas.width  = hero.offsetWidth;
+  matrixCanvas.height = hero.offsetHeight;
+}
+resizeMatrix();
+
+const cols = Math.floor(hero.offsetWidth / 16);
+const drops = Array(cols).fill(1);
+
+function drawMatrix() {
+  if (!matrixActive) return;
+  matrixCtx.fillStyle = 'rgba(4,52,44,0.18)';
+  matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+  matrixCtx.fillStyle = '#5DCAA5';
+  matrixCtx.font = '13px monospace';
+  drops.forEach((y, i) => {
+    const char = Math.random() > 0.5
+      ? String.fromCharCode(48 + Math.floor(Math.random()*10))
+      : ['▲','▼','$','%','₹','€'][Math.floor(Math.random()*6)];
+    matrixCtx.fillText(char, i * 16, y * 16);
+    if (y * 16 > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  });
+  requestAnimationFrame(drawMatrix);
+}
+
+hero.addEventListener('mouseenter', () => {
+  matrixTimer = setTimeout(() => { matrixActive = true; drawMatrix(); }, 1200);
+});
+hero.addEventListener('mouseleave', () => {
+  clearTimeout(matrixTimer);
+  matrixActive = false;
+  matrixCtx.clearRect(0,0,matrixCanvas.width,matrixCanvas.height);
+});
+</script>
+</body>
+</html>
